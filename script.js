@@ -56,7 +56,15 @@ async function generateRecipe() {
         Genera una receta de cocina española usando los siguientes ingredientes: ${ingredients.join(', ')}.
         ${restrictions.length > 0 ? `La receta debe ser ${restrictions.join(' y ')}.` : ''}
         Proporciona el nombre de la receta, el tiempo de preparación, una lista de ingredientes (incluyendo los proporcionados y otros necesarios), y las instrucciones paso a paso.
-        Asegúrate de que el formato sea claro y organizado.
+        Asegúrate de que el formato sea claro y organizado, usando este formato:
+        ### Nombre de la Receta
+        **Tiempo de Preparación:** X minutos
+        **Ingredientes:**
+        - Ingrediente 1
+        - Ingrediente 2
+        **Instrucciones:**
+        1. Paso 1
+        2. Paso 2
     `;
 
     // Mostrar un mensaje de carga mientras la IA genera la receta
@@ -65,7 +73,7 @@ async function generateRecipe() {
     try {
         // Configurar la solicitud a la API de Hugging Face
         const API_KEY = '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'; // Token proporcionado
-        const response = await fetch('https://api-inference.huggingface.co/models/mixtral-8x7b-instruct-v0.1', {
+        const response = await fetch('https://api-inference.huggingface.co/models/google/flan-t5-large', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${API_KEY}`,
@@ -81,6 +89,10 @@ async function generateRecipe() {
             }),
         });
 
+        if (!response.ok) {
+            throw new Error(`Error en la API: ${response.status} - ${response.statusText}`);
+        }
+
         const data = await response.json();
 
         if (data && data[0] && data[0].generated_text) {
@@ -92,6 +104,7 @@ async function generateRecipe() {
                 .replace(/\n\n/g, '</p><p>')
                 .replace(/\n/g, '<br>')
                 .replace(/### (.*?)(<br>|<\/p>)/g, '<h3>$1</h3>')
+                .replace(/\*\*Tiempo de Preparación:\*\* (.*?)(<br>|<\/p>)/g, '<p><strong>Tiempo de Preparación:</strong> $1</p>')
                 .replace(/\*\*Ingredientes:\*\*/g, '<h4>Ingredientes:</h4><ul>')
                 .replace(/\*\*Instrucciones:\*\*/g, '</ul><h4>Instrucciones:</h4><ol>')
                 .replace(/- (.*?)(<br>|<\/p>)/g, '<li>$1</li>')
@@ -101,10 +114,10 @@ async function generateRecipe() {
 
             recipeOutput.innerHTML = `<p>${formattedRecipe}</p>`;
         } else {
-            recipeOutput.innerHTML = '<p>Lo siento, no se pudo generar la receta. Intenta de nuevo.</p>';
+            recipeOutput.innerHTML = '<p>Lo siento, no se pudo generar la receta. Es posible que la respuesta de la API no sea válida. Intenta de nuevo.</p>';
         }
     } catch (error) {
         console.error('Error al generar la receta:', error);
-        recipeOutput.innerHTML = '<p>Hubo un error al generar la receta. Por favor, intenta de nuevo más tarde.</p>';
+        recipeOutput.innerHTML = `<p>Hubo un error al generar la receta: ${error.message}. Por favor, intenta de nuevo más tarde.</p>`;
     }
 }
