@@ -52,22 +52,18 @@ async function generateRecipe() {
     if (sinNueces) restrictions.push('sin nueces');
 
     // Crear el prompt para la IA
-    const prompt = `Genera una receta de cocina española con los ingredientes: ${ingredients.join(', ')}. ${restrictions.length > 0 ? `Debe ser ${restrictions.join(' y ')}.` : ''} Incluye el nombre de la receta, el tiempo de preparación, una lista de ingredientes (incluyendo los proporcionados y otros necesarios), y las instrucciones paso a paso en este formato:
-    ### Nombre de la Receta
-    **Tiempo de Preparación:** X minutos
-    **Ingredientes:**
-    - Ingrediente 1
-    - Ingrediente 2
-    **Instrucciones:**
-    1. Paso 1
-    2. Paso 2`;
+    const prompt = `Crea una receta de cocina española usando estos ingredientes: ${ingredients.join(', ')}. ${restrictions.length > 0 ? `Debe ser ${restrictions.join(' y ')}.` : ''} Proporciona el nombre de la receta, el tiempo de preparación, los ingredientes y los pasos en un formato simple. Ejemplo:
+Nombre: Receta Ejemplo
+Tiempo: 30 minutos
+Ingredientes: ingrediente 1, ingrediente 2
+Pasos: 1. Hacer esto. 2. Hacer aquello.`;
 
     // Mostrar un mensaje de carga
     recipeOutput.innerHTML = '<p>Generando receta, por favor espera...</p>';
 
     try {
         const API_KEY = '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';
-        const response = await fetch('https://api-inference.huggingface.co/models/google/flan-t5-large', {
+        const response = await fetch('https://api-inference.huggingface.co/models/distilgpt2', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${API_KEY}`,
@@ -76,7 +72,7 @@ async function generateRecipe() {
             body: JSON.stringify({
                 inputs: prompt,
                 parameters: {
-                    max_length: 500,
+                    max_length: 300, // Reducimos el tamaño para modelos pequeños
                     temperature: 0.7,
                     top_p: 0.9,
                 },
@@ -95,14 +91,11 @@ async function generateRecipe() {
             const formattedRecipe = generatedRecipe
                 .replace(/\n\n/g, '</p><p>')
                 .replace(/\n/g, '<br>')
-                .replace(/### (.*?)(<br>|<\/p>)/g, '<h3>$1</h3>')
-                .replace(/\*\*Tiempo de Preparación:\*\* (.*?)(<br>|<\/p>)/g, '<p><strong>Tiempo de Preparación:</strong> $1</p>')
-                .replace(/\*\*Ingredientes:\*\*/g, '<h4>Ingredientes:</h4><ul>')
-                .replace(/\*\*Instrucciones:\*\*/g, '</ul><h4>Instrucciones:</h4><ol>')
-                .replace(/- (.*?)(<br>|<\/p>)/g, '<li>$1</li>')
-                .replace(/\d+\. (.*?)(<br>|<\/p>)/g, '<li>$1</li>')
-                .replace(/<\/ul>/g, '</ul>')
-                .replace(/<\/ol>/g, '</ol>');
+                .replace(/Nombre: (.*?)(<br>|<\/p>)/g, '<h3>$1</h3>')
+                .replace(/Tiempo: (.*?)(<br>|<\/p>)/g, '<p><strong>Tiempo de Preparación:</strong> $1</p>')
+                .replace(/Ingredientes: (.*?)(<br>|<\/p>)/g, '<h4>Ingredientes:</h4><ul><li>$1</li></ul>')
+                .replace(/Pasos: (.*?)(<br>|<\/p>)/g, '</ul><h4>Instrucciones:</h4><ol><li>$1</li></ol>')
+                .replace(/(\d+\.\s)/g, '</li><li>'); // Separa los pasos en elementos de lista
 
             recipeOutput.innerHTML = `<p>${formattedRecipe}</p>`;
         } else {
