@@ -52,14 +52,22 @@ async function generateRecipe() {
     if (sinNueces) restrictions.push('sin nueces');
 
     // Crear el prompt para la IA
-    const prompt = `Genera una receta de cocina española con los ingredientes: ${ingredients.join(', ')}. ${restrictions.length > 0 ? `Debe ser ${restrictions.join(' y ')}.` : ''} Incluye el nombre, tiempo de preparación, lista de ingredientes y pasos.`;
+    const prompt = `Genera una receta de cocina española con los ingredientes: ${ingredients.join(', ')}. ${restrictions.length > 0 ? `Debe ser ${restrictions.join(' y ')}.` : ''} Incluye el nombre de la receta, el tiempo de preparación, una lista de ingredientes (incluyendo los proporcionados y otros necesarios), y las instrucciones paso a paso en este formato:
+    ### Nombre de la Receta
+    **Tiempo de Preparación:** X minutos
+    **Ingredientes:**
+    - Ingrediente 1
+    - Ingrediente 2
+    **Instrucciones:**
+    1. Paso 1
+    2. Paso 2`;
 
     // Mostrar un mensaje de carga
     recipeOutput.innerHTML = '<p>Generando receta, por favor espera...</p>';
 
     try {
         const API_KEY = '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';
-        const response = await fetch('https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf', {
+        const response = await fetch('https://api-inference.huggingface.co/models/google/flan-t5-large', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${API_KEY}`,
@@ -76,7 +84,8 @@ async function generateRecipe() {
         });
 
         if (!response.ok) {
-            throw new Error(`Error en la API: ${response.status} - ${response.statusText}`);
+            const errorText = await response.text();
+            throw new Error(`Error en la API: ${response.status} - ${response.statusText}. Detalle: ${errorText}`);
         }
 
         const data = await response.json();
@@ -87,6 +96,7 @@ async function generateRecipe() {
                 .replace(/\n\n/g, '</p><p>')
                 .replace(/\n/g, '<br>')
                 .replace(/### (.*?)(<br>|<\/p>)/g, '<h3>$1</h3>')
+                .replace(/\*\*Tiempo de Preparación:\*\* (.*?)(<br>|<\/p>)/g, '<p><strong>Tiempo de Preparación:</strong> $1</p>')
                 .replace(/\*\*Ingredientes:\*\*/g, '<h4>Ingredientes:</h4><ul>')
                 .replace(/\*\*Instrucciones:\*\*/g, '</ul><h4>Instrucciones:</h4><ol>')
                 .replace(/- (.*?)(<br>|<\/p>)/g, '<li>$1</li>')
