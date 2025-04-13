@@ -63,7 +63,7 @@ Pasos: 1. Hacer esto. 2. Hacer aquello.`;
 
     try {
         const API_KEY = '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';
-        const response = await fetch('https://api-inference.huggingface.co/models/distilgpt2', {
+        const response = await fetch('https://api-inference.huggingface.co/models/gpt2', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${API_KEY}`,
@@ -72,7 +72,7 @@ Pasos: 1. Hacer esto. 2. Hacer aquello.`;
             body: JSON.stringify({
                 inputs: prompt,
                 parameters: {
-                    max_length: 300, // Reducimos el tamaño para modelos pequeños
+                    max_length: 300,
                     temperature: 0.7,
                     top_p: 0.9,
                 },
