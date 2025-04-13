@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recetas de Cocina Española</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Recetas de Cocina Española</h1>
+        <p>Genera recetas deliciosas con los ingredientes que tengas en casa</p>
+    </header>
+    <main>
+        <section class="input-section">
+            <h2>Añade tus ingredientes</h2>
+            <div class="ingredient-input">
+                <input type="text" id="ingredientInput" placeholder="Ej. tomate, pollo, arroz...">
+                <button onclick="addIngredient()">Añadir</button>
+            </div>
+            <div id="ingredientList" class="ingredient-list"></div>
+
+            <h2>Restricciones Dietéticas</h2>
+            <div class="diet-restrictions">
+                <label><input type="checkbox" id="vegetariano"> Vegetariano</label>
+                <label><input type="checkbox" id="vegano"> Vegano</label>
+                <label><input type="checkbox" id="sinGluten"> Sin Gluten</label>
+                <label><input type="checkbox" id="sinLacteos"> Sin Lácteos</label>
+                <label><input type="checkbox" id="sinNueces"> Sin Nueces</label>
+            </div>
+
+            <button class="generate-btn" onclick="generateRecipe()">Generar Receta</button>
+        </section>
+
+        <section class="recipe-section">
+            <h2>Tu Receta</h2>
+            <div id="recipeOutput" class="recipe-output">
+                <p>La receta generada aparecerá aquí.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Recetas de Cocina Española. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
